@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইতিহাস কুইজ - দিল্লি সুলতানি, মুঘল ও বাংলা</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Bengali -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-900 text-white shadow-md py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-landmark text-amber-400 text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide">ইতিহাস মেগা কুইজ (৭০ নম্বর)</h1>
+            </div>
+            <div id="user-display" class="hidden text-amber-300 font-semibold text-sm md:text-base">
+                <i class="fa-solid fa-user me-1"></i> <span id="current-user-name"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full p-4 md:p-6 flex-grow flex items-center justify-center">
+
+        <!-- STEP 1: Registration Screen -->
+        <div id="start-screen" class="bg-white rounded-2xl p-6 md:p-10 w-full custom-shadow text-center">
+            <div class="w-20 h-20 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-3">অনলাইন ইতিহাস মেগা টেস্ট</h2>
+            <p class="text-slate-600 mb-6 max-w-lg mx-auto">
+                এই কুইজে <strong>দিল্লি সুলতানি</strong>, <strong>মুঘল সাম্রাজ্য</strong> এবং <strong>বাংলার সুলতানি বংশ</strong> থেকে মোট <strong>৭০টি গুরুত্বপূর্ণ MCQ</strong> রয়েছে। প্রতিটি প্রশ্নের মান ১।
+            </p>
+
+            <form id="start-form" class="max-w-md mx-auto space-y-4" onsubmit="startQuiz(event)">
+                <div class="text-left">
+                    <label for="username" class="block text-sm font-semibold text-slate-700 mb-1">আপনার নাম লিখুন *</label>
+                    <input type="text" id="username" required placeholder="উদাহরণ: রহিম আহমেদ" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2 text-lg">
+                    <span>পরীক্ষা শুরু করুন</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- STEP 2: Quiz Screen -->
+        <div id="quiz-screen" class="hidden w-full space-y-6">
+            <!-- Progress Bar & Stats -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div class="flex items-center space-x-2 text-slate-700 font-medium">
+                    <span>প্রশ্ন: <strong id="current-q-num" class="text-indigo-600">১</strong>/৭০</span>
+                </div>
+                <div class="w-full md:w-1/2 bg-slate-200 rounded-full h-3 overflow-hidden">
+                    <div id="progress-bar" class="bg-indigo-600 h-full w-0 transition-all duration-300"></div>
+                </div>
+                <div class="text-xs md:text-sm text-slate-500">
+                    উত্তর দেওয়া হয়েছে: <span id="answered-count" class="font-bold text-slate-700">০</span>/৭০
+                </div>
+            </div>
+
+            <!-- Questions Form -->
+            <div id="questions-container" class="space-y-6">
+                <!-- Dynamically Inserted Questions -->
+            </div>
+
+            <!-- Submit Section -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-sm text-slate-500">সমস্ত উত্তর নির্বাচন করা নিশ্চিত করে জমা দিন।</p>
+                <button onclick="submitQuiz()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>পরীক্ষা শেষ করুন</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Result Screen -->
+        <div id="result-screen" class="hidden w-full bg-white rounded-2xl p-6 md:p-10 custom-shadow text-center">
+            <div class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl" id="result-icon-bg">
+                <i id="result-icon" class="fa-solid"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-1" id="result-user-title">অভিনন্দন!</h2>
+            <p class="text-slate-500 mb-6">আপনার কুইজের ফলাফল তৈরি করা হয়েছে</p>
+
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 max-w-md mx-auto mb-8 space-y-3">
+                <div class="text-sm text-slate-600 font-semibold">প্রাপ্ত মোট নম্বর</div>
+                <div class="text-5xl font-extrabold text-indigo-700"><span id="score-display">0</span> <span class="text-2xl text-slate-500 font-normal">/ ৭০</span></div>
+                <div class="text-sm font-medium" id="percentage-display">শতাংশ: 0%</div>
+                <div id="performance-tag" class="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mt-2"></div>
+            </div>
+
+            <!-- Detailed Analysis Section -->
+            <div class="text-left mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2 flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-indigo-600"></i>
+                    <span>বিস্তারিত উত্তর পর্যালোচনা</span>
+                </h3>
+                <div id="review-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    <!-- Review Questions dynamically added here -->
+                </div>
+            </div>
+
+            <button onclick="restartQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition inline-flex items-center space-x-2">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>পুনরায় পরীক্ষা দিন</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-400 text-center py-4 text-sm mt-auto">
+        <p>© দিল্লি সুলতানি, মুঘল সাম্রাজ্য এবং বাংলার সুলতানি বংশ কুইজ</p>
+    </footer>
+
+    <!-- JavaScript Data and Logic -->
+    <script>
+        // 70 MCQ Questions Data Structure
+        const quizData = [
+            // --- দিল্লি সুলতানি (Delhi Sultanate) ---
+            {
+                q: "দিল্লি সুলতানির প্রতিষ্ঠাতা কে ছিলেন?",
+                options: ["ইলতুৎমিশ", "কুুতুবউদ্দিন আইবক", "বুলবন", "মুহাম্মদ ঘোরী"],
+                correct: 1
+            },
+            {
+                q: "দাস বংশের প্রকৃত প্রতিষ্ঠাতা কাকে মনে করা হয়?",
+                options: ["কুুতুবউদ্দিন আইবক", "ইলতুৎমিশ", "সুলতানা রাজিয়া", "গিয়াসউদ্দিন বলবন"],
+                correct: 1
+            },
+            {
+                q: "কুতুব মিনারের নির্মাণ কাজ শেষ করেন কে?",
+                options: ["কুতুবউদ্দিন আইবক", "ইলতুৎমিশ", "ফিরোজ শাহ তুঘলক", "আলাউদ্দিন খলজি"],
+                correct: 1
+            },
+            {
+                q: "'চাহালগানী' বা চল্লিশ চক্র কে গঠন করেছিলেন?",
+                options: ["ইলতুৎমিশ", "বলবন", "আলাউদ্দিন খলজি", "রুকনুদ্দিন"],
+                correct: 0
+            },
+            {
+                q: "দিল্লির সিংহাসনে বসা প্রথম ও একমাত্র মহিলা মুসলিম শাসক কে ছিলেন?",
+                options: ["চান্দ বিবি", "নুরজাহান", "সুলতানা রাজিয়া", "মমতাজ মহল"],
+                correct: 2
+            },
+            {
+                q: "'সিজদা' ও 'পাইবস' প্রথা কে প্রবর্তন করেন?",
+                options: ["ইলতুৎমিশ", "গিয়াসউদ্দিন বলবন", "আলাউদ্দিন খলজি", "মোহাম্মদ বিন তুঘলক"],
+                correct: 1
+            },
+            {
+                q: "নওরোজ উৎসবের প্রচলন কে করেছিলেন?",
+                options: ["গিয়াসউদ্দিন বলবন", "আলাউদ্দিন খলজি", "আকবর", "ইলতুৎমিশ"],
+                correct: 0
+            },
+            {
+                q: "খলজি বংশের প্রতিষ্ঠাতা কে?",
+                options: ["আলাউদ্দিন খলজি", "জালালউদ্দিন খলজি", "মোবারক খলজি", "খিজির খাঁ"],
+                correct: 1
+            },
+            {
+                q: "দিল্লির কোন সুলতান 'দ্বিতীয় সেকেন্দার' (সেকেন্দার-ই-সানি) উপাধি গ্রহণ করেছিলেন?",
+                options: ["আলাউদ্দিন খলজি", "মোহাম্মদ বিন তুঘলক", "ইলতুৎমিশ", "ইব্রাহিম লোদি"],
+                correct: 0
+            },
+            {
+                q: "বাজার দর নিয়ন্ত্রণ নীতি কে প্রবর্তন করেন?",
+                options: ["বুলবন", "আলাউদ্দিন খলজি", "ফিরোজ শাহ তুঘলক", "শেরশাহ"],
+                correct: 1
+            },
+            {
+                q: "আলাই দরওয়াজা কে নির্মাণ করেন?",
+                options: ["কুতুবউদ্দিন আইবক", "আলাউদ্দিন খলজি", "ইলতুৎমিশ", "আকবর"],
+                correct: 1
+            },
+            {
+                q: "দাগ ও হুলিয়া ব্যবস্থা কে চালু করেন?",
+                options: ["আলাউদ্দিন খলজি", "শেরশাহ", "ইলতুৎমিশ", "মোহাম্মদ বিন তুঘলক"],
+                correct: 0
+            },
+            {
+                q: "তুঘলক বংশের প্রতিষ্ঠাতা কে ছিলেন?",
+                options: ["মোহাম্মদ বিন তুঘলক", "গিয়াসউদ্দিন তুঘলক", "ফিরোজ শাহ তুঘলক", "নাসিরউদ্দিন মাহমুদ"],
+                correct: 1
+            },
+            {
+                q: "দিল্লি থেকে দেবগিরিতে (দৌলতাবাদ) রাজধানী স্থানান্তর করেন কে?",
+                options: ["গিয়াসউদ্দিন তুঘলক", "মোহাম্মদ বিন তুঘলক", "আলাউদ্দিন খলজি", "ইব্রাহিম লোদি"],
+                correct: 1
+            },
+            {
+                q: "তামার প্রতীকী মুদ্রা (Token Currency) কে প্রবর্তন করেছিলেন?",
+                options: ["ইলতুৎমিশ", "মোহাম্মদ বিন তুঘলক", "আকবর", "শেরশাহ"],
+                correct: 1
+            },
+            {
+                q: "ইবন বতুতা কার রাজত্বকালে ভারতে আসেন?",
+                options: ["আলাউদ্দিন খলজি", "মোহাম্মদ বিন তুঘলক", "ফিরোজ শাহ তুঘলক", "বাবর"],
+                correct: 1
+            },
+            {
+                q: "'রেহলা' গ্রন্থটি কার রচনা?",
+                options: ["আমির খসরু", "ইবন বতুতা", "আল বিরুনি", "আবুল ফজল"],
+                correct: 1
+            },
+            {
+                q: "দিল্লির কোন সুলতানকে 'পাগলা রাজা' বলা হতো?",
+                options: ["মোহাম্মদ বিন তুঘলক", "মোবারক শাহ", "ইব্রাহিম লোদি", "কুতুবউদ্দিন আইবক"],
+                correct: 0
+            },
+            {
+                q: "দিল্লির সুলতানি যুগের 'আকবর' কাকে বলা হয়?",
+                options: ["আলাউদ্দিন খলজি", "ফিরোজ শাহ তুঘলক", "ইলতুৎমিশ", "গিয়াসউদ্দিন বলবন"],
+                correct: 1
+            },
+            {
+                q: "সৈয়দ বংশের প্রতিষ্ঠাতা কে ছিলেন?",
+                options: ["খিজির খাঁ", "মোবারক শাহ", "মুহাম্মদ শাহ", "আলম শাহ"],
+                correct: 0
+            },
+            {
+                q: "লোদি বংশের প্রতিষ্ঠাতা কে?",
+                options: ["সিকান্দার লোদি", "বাহলুল লোদি", "ইব্রাহিম লোদি", "দৌলত খাঁ লোদি"],
+                correct: 1
+            },
+            {
+                q: "আগ্রা শহরটি কে প্রতিষ্ঠা করেন?",
+                options: ["আকবর", "সিকান্দার লোদি", "শাহজাহান", "শেরশাহ"],
+                correct: 1
+            },
+            {
+                q: "দিল্লি সুলতানির শেষ শাসক কে ছিলেন?",
+                options: ["বাহলুল লোদি", "সিকান্দার লোদি", "ইব্রাহিম লোদি", "দাউদ খাঁ কররানি"],
+                correct: 2
+            },
+            {
+                q: "পানিপথের প্রথম যুদ্ধ কত সালে হয়েছিল?",
+                options: ["১৫২৬", "১৫৫৬", "১৭৬১", "১৫৩৯"],
+                correct: 0
+            },
+            {
+                q: "ভারতের তোতাপাখি (তুতি-ই-হিন্দ) কাকে বলা হতো?",
+                options: ["তানসেন", "আমির খসরু", "জিয়াউদ্দিন বারানি", "ইবন বতুতা"],
+                correct: 1
+            },
+
+            // --- বাংলার সুলতানি বংশ (Bengal Sultanate) ---
+            {
+                q: "১২০৪-১২০৫ খ্রিষ্টাব্দে বাংলা কে জয় করেন?",
+                options: ["মুহাম্মদ ঘোরী", "ইখতিয়ার উদ্দিন মুহাম্মদ বিন বখতিয়ার খলজি", "ইলতুৎমিশ", "আলাউদ্দিন হোসেন শাহ"],
+                correct: 1
+            },
+            {
+                q: "বখতিয়ার খলজি সেন বংশের কোন রাজাকে পরাজিত করে বাংলা জয় করেন?",
+                options: ["বল্লাল সেন", "লক্ষণ সেন", "সামন্ত সেন", "বিজয় সেন"],
+                correct: 1
+            },
+            {
+                q: "বাংলার প্রথম স্বাধীন সুলতান কে ছিলেন?",
+                options: ["ফাখরুদ্দিন মুবারক শাহ", "শামসুদ্দিন ইলিয়াস শাহ", "আলাউদ্দিন হোসেন শাহ", "গিয়াসউদ্দিন আজম শাহ"],
+                correct: 0
+            },
+            {
+                q: "সমগ্র বাংলার (শাহ-ই-বাঙালিয়ান) প্রথম একত্রীকরণকারী স্বাধীন সুলতান কে?",
+                options: ["ইলিয়াস শাহ", "সিকান্দার শাহ", "আজম শাহ", "হোসেন শাহ"],
+                correct: 0
+            },
+            {
+                q: "পান্ডুয়ার বিখ্যাত 'আদিনা মসজিদ' কে নির্মাণ করেন?",
+                options: ["ইলিয়াস শাহ", "সিকান্দার শাহ", "গিয়াসউদ্দিন আজম শাহ", "আলাউদ্দিন হোসেন শাহ"],
+                correct: 1
+            },
+            {
+                q: "চীনের মিং সম্রাটের দরবারে দূত পাঠিয়েছিলেন বাংলার কোন সুলতান?",
+                options: ["গিয়াসউদ্দিন আজম শাহ", "ইলিয়াস শাহ", "রুকনুদ্দিন বারবক শাহ", "নসরত শাহ"],
+                correct: 0
+            },
+            {
+                q: "পারস্যের কবি হাফিজের সাথে কোন সুলতানের পত্রালাপ হতো?",
+                options: ["আলাউদ্দিন হোসেন শাহ", "গিয়াসউদ্দিন আজম শাহ", "শামসুদ্দিন ইলিয়াস শাহ", "যদু/জোটাল"],
+                correct: 1
+            },
+            {
+                q: "ইলিয়াস শাহী বংশের পর বাংলায় কোন হিন্দু রাজা কিছুকালের জন্য শাসন প্রতিষ্ঠা করেন?",
+                options: ["রাজা গণেশ", "রাজা তোডরমল", "রাজা মানসিংহ", "রাজা বল্লাল সেন"],
+                correct: 0
+            },
+            {
+                q: "বাংলার হোসেন শাহী বংশের প্রতিষ্ঠাতা কে ছিলেন?",
+                options: ["নসরত শাহ", "আলাউদ্দিন হোসেন শাহ", "মুজাফফর শাহ", "মৌলানা মুজাফফর"],
+                correct: 1
+            },
+            {
+                q: "বাংলার 'আকবর' কাকে বলা হয়?",
+                options: ["গিয়াসউদ্দিন আজম শাহ", "আলাউদ্দিন হোসেন শাহ", "ইলিয়াস শাহ", "নসরত শাহ"],
+                correct: 1
+            },
+            {
+                q: "শ্রীচৈতন্যদেব কার রাজত্বকালে বৈষ্ণবধর্ম প্রচার করেন?",
+                options: ["আলাউদ্দিন হোসেন শাহ", "গিয়াসউদ্দিন আজম শাহ", "ইলিয়াস শাহ", "শায়েস্তা খাঁ"],
+                correct: 0
+            },
+            {
+                q: "গৌড়ের বিখ্যাত 'বড় সোনা মসজিদ' বা বারোদুয়ারী মসজিদ কে নির্মাণ করেন?",
+                options: ["আলাউদ্দিন হোসেন শাহ", "নসরত শাহ", "সুলতান মাহমুদ শাহ", "বখতিয়ার খলজি"],
+                correct: 1
+            },
+            {
+                q: "গৌড়ের 'কদম রসূল' ভবন কে নির্মাণ করেন?",
+                options: ["নসরত শাহ", "হোসেন শাহ", "ইলিয়াস শাহ", "বারবক শাহ"],
+                correct: 0
+            },
+            {
+                q: "ছোট সোনা মসজিদ কার রাজত্বকালে নির্মিত হয়?",
+                options: ["আলাউদ্দিন হোসেন শাহ", "নসরত শাহ", "আজম শাহ", "যদু"],
+                correct: 0
+            },
+            {
+                q: "বাংলা সাহিত্যের পৃষ্ঠপোষকতার জন্য কোন সুলতানকে 'নৃপতি তিলক' বলা হতো?",
+                options: ["আলাউদ্দিন হোসেন শাহ", "গিয়াসউদ্দিন আজম শাহ", "ইলিয়াস শাহ", "নসরত শাহ"],
+                correct: 0
+            },
+            {
+                q: "মহাভারত বাংলায় অনুবাদ করার ক্ষেত্রে কোন সুলতানের বিশেষ অবদান ছিল?",
+                options: ["আলাউদ্দিন হোসেন শাহ", "ইলিয়াস শাহ", "সিকান্দার শাহ", "জালালউদ্দিন"],
+                correct: 0
+            },
+            {
+                q: "বাংলার শেষ স্বাধীন সুলতান কে ছিলেন (মুঘল আক্রমণের পূর্বে)?",
+                options: ["গিয়াসউদ্দিন মাহমুদ শাহ", "দাউদ খান কররানি", "নসরত শাহ", "সুলেমান কররানি"],
+                correct: 0
+            },
+            {
+                q: "বাংলার আফগান শাসন কে প্রতিষ্ঠা করেছিলেন?",
+                options: ["শেরশাহ", "সুলেমান কররানি", "দাউদ খান", "খিজির খাঁ"],
+                correct: 1
+            },
+            {
+                q: "বাংলার আফগান শাসনের শেষ সুলতান কে ছিলেন?",
+                options: ["সুলেমান কররানি", "দাউদ খান কররানি", "শেরশাহ", "ইসলাম শাহ"],
+                correct: 1
+            },
+            {
+                q: "রাজমহলের যুদ্ধ (১৫৭৬) কার কার মধ্যে হয়েছিল?",
+                options: ["আকবর ও দাউদ খাঁ কররানি", "বাবর ও ইব্রাহিম লোদি", "শেরশাহ ও হুমায়ুন", "মানসিংহ ও প্রতাপাদিত্য"],
+                correct: 0
+            },
+
+            // --- মুঘল সাম্রাজ্য (Mughal Empire) ---
+            {
+                q: "মুঘল সাম্রাজ্যের প্রতিষ্ঠাতা কে?",
+                options: ["আকবর", "বাবর", "হুমায়ুন", "জাহাঙ্গীর"],
+                correct: 1
+            },
+            {
+                q: "খানওয়ার যুদ্ধ (১৫২৭) বাবরের সাথে কার হয়েছিল?",
+                options: ["ইব্রাহিম লোদি", "রানা সঙ্গাত বা রানা সাঙ্গা", "মেদিনী রাই", "শেরশাহ"],
+                correct: 1
+            },
+            {
+                q: "'তুজুক-ই-বাবরী' (বাবরনামা) কোন ভাষায় রচিত?",
+                options: ["ফারসি", "তুর্কি", "আরবি", "উর্দু"],
+                correct: 1
+            },
+            {
+                q: "চৌসার যুদ্ধ (১৫৩৯) কার কার মধ্যে হয়েছিল?",
+                options: ["বাবর ও রানা সাঙ্গা", "হুমায়ুন ও শেরশাহ", "আকবর ও হেমু", "শাহজাহান ও ঔরঙ্গজেব"],
+                correct: 1
+            },
+            {
+                q: "জিটি রোড (Grand Trunk Road) কে নির্মাণ করেন?",
+                options: ["আকবর", "শেরশাহ", "শাহজাহান", "কার্জন"],
+                correct: 1
+            },
+            {
+                q: "কবুলিয়ত ও পাট্টা প্রথা কে প্রবর্তন করেন?",
+                options: ["শেরশাহ", "আকবর", "আলাউদ্দিন খলজি", "ইলতুৎমিশ"],
+                correct: 0
+            },
+            {
+                q: "পানিপথের দ্বিতীয় যুদ্ধ (১৫৫৬) কার কার মধ্যে হয়েছিল?",
+                options: ["বাবর ও ইব্রাহিম লোদি", "আকবর (বইরাম খাঁ) ও হেমু", "হুমায়ুন ও শেরশাহ", "আহমেদ শাহ আবদালী ও মারাঠা"],
+                correct: 1
+            },
+            {
+                q: "মনসবদারী প্রথা কে চালু করেছিলেন?",
+                options: ["শেরশাহ", "আকবর", "জাহাঙ্গীর", "শাহজাহান"],
+                correct: 1
+            },
+            {
+                q: "দ্বীন-ই-ইলাহি ধর্মের প্রবর্তক কে?",
+                options: ["কবীর", "আকবর", "শাহজাহান", "ঔরঙ্গজেব"],
+                correct: 1
+            },
+            {
+                q: "'জবতি' বা রাজস্ব ব্যবস্থা কার মস্তিষ্কপ্রসূত ছিল?",
+                options: ["আবুল ফজল", "বীরবল", "রাজা তোডরমল", "মানসিংহ"],
+                correct: 2
+            },
+            {
+                q: "হলদিঘাটের যুদ্ধ (১৫৭৬) আকবরের সেনাপতি মানসিংহের সাথে কার হয়েছিল?",
+                options: ["রানা প্রতাপ সিংহ", "রানা সাঙ্গা", "উদয় সিংহ", "বীর অমর সিংহ"],
+                correct: 0
+            },
+            {
+                q: "'আইন-ই-আকবরী' ও 'আকবরনামা' গ্রন্থটির লেখক কে?",
+                options: ["আমির খসরু", "আবুল ফজল", "ফৈজি", "গুগি বেগ"],
+                correct: 1
+            },
+            {
+                q: "আকবরের নবরত্নের মধ্যে হাস্যরসিক উপদেষ্টা কে ছিলেন?",
+                options: ["তানসেন", "তোডরমল", "বীরবল", "মোল্লা দো পিঁয়াজা"],
+                correct: 2
+            },
+            {
+                q: "বুলন্দ দরওয়াজা আকবর কোন রাজ্য জয়ের স্মারক হিসেবে নির্মাণ করেন?",
+                options: ["বঙ্গল", "গুজরাট", "মেবার", "দাক্ষিণাত্য"],
+                correct: 1
+            },
+            {
+                q: "মুঘল সম্রাট জাহাঙ্গীরের আসল নাম কি ছিল?",
+                options: ["খুররম", "সিমরুন", "সেলিম", "ফরিদ"],
+                correct: 2
+            },
+            {
+                q: "কোন শিখ গুরুকে জাহাঙ্গীর মৃত্যুদণ্ড দিয়েছিলেন?",
+                options: ["গুরু নানক", "গুরু অর্জন দেব", "গুরু তেগ বাহাদুর", "গুরু গোবিন্দ সিংহ"],
+                correct: 1
+            },
+            {
+                q: "স্যার থমাস রো এবং ক্যাপ্টেন উইলিয়াম হকিন্স কার দরবারে আসেন?",
+                options: ["আকবর", "জাহাঙ্গীর", "শাহজাহান", "ঔরঙ্গজেব"],
+                correct: 1
+            },
+            {
+                q: "চিত্রকলার স্বর্ণযুগ বলা হয় কার রাজত্বকালকে?",
+                options: ["আকবর", "জাহাঙ্গীর", "শাহজাহান", "ঔরঙ্গজেব"],
+                correct: 1
+            },
+            {
+                q: "স্থাপত্যকলার স্বর্ণযুগ কার রাজত্বকালকে বলা হয়?",
+                options: ["শাহজাহান", "আকবর", "জাহাঙ্গীর", "শেরশাহ"],
+                correct: 0
+            },
+            {
+                q: "ময়ূর সিংহাসন কে নির্মাণ করিয়েছিলেন?",
+                options: ["শাহজাহান", "ঔরঙ্গজেব", "আকবর", "জাহাঙ্গীর"],
+                correct: 0
+            },
+            {
+                q: "ময়ূর সিংহাসন ও কোহিনুর হীরা ভারত থেকে লুঠ করে কে নিয়ে যান?",
+                options: ["আহমেদ শাহ আবদালী", "নাদির শাহ", "তৈমুর লং", "চঙ্গিস খান"],
+                correct: 1
+            },
+            {
+                q: "'জিন্দা পীর' কাকে বলা হতো?",
+                options: ["আকবর", "ঔরঙ্গজেব", "শাহজাহান", "বাবর"],
+                correct: 1
+            },
+            {
+                q: "কোন শিখ গুরুকে ঔরঙ্গজেব হত্যা করেছিলেন?",
+                options: ["গুরু অর্জন দেব", "গুরু তেগ বাহাদুর", "গুরু গোবিন্দ সিংহ", "গুরু রামদাস"],
+                correct: 1
+            },
+            {
+                q: "আসামের আহোম রাজ্য ও মুঘলদের মধ্যে শরাইঘাটের যুদ্ধ (১৬৭১) কার সময়ে হয়েছিল?",
+                options: ["শাহজাহান", "ঔরঙ্গজেব", "জাহাঙ্গীর", "আকবর"],
+                correct: 1
+            },
+            {
+                q: "সর্বশেষ প্রভাবশালী মুঘল সম্রাট কে ছিলেন?",
+                options: ["দ্বিতীয় বাহাদুর শাহ", "ঔরঙ্গজেব", "মুহাম্মদ শাহ", "ফারুখসিয়ার"],
+                correct: 1
+            }
+        ];
+
+        // State variables
+        let userName = "";
+        let userAnswers = new Array(quizData.length).fill(null);
+
+        // DOM elements
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionsContainer = document.getElementById('questions-container');
+        const userDisplay = document.getElementById('user-display');
+        const currentUserNameSpan = document.getElementById('current-user-name');
+        const progressBar = document.getElementById('progress-bar');
+        const answeredCountSpan = document.getElementById('answered-count');
+
+        // Start Quiz Function
+        function startQuiz(e) {
+            e.preventDefault();
+            const inputName = document.getElementById('username').value.trim();
+            if (!inputName) return;
+
+            userName = inputName;
+            currentUserNameSpan.innerText = userName;
+            userDisplay.classList.remove('hidden');
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+
+            renderQuestions();
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render Questions to HTML
+        function renderQuestions() {
+            questionsContainer.innerHTML = "";
+            quizData.forEach((qData, index) => {
+                const qCard = document.createElement('div');
+                qCard.className = "bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm transition hover:shadow-md";
+                qCard.id = `q-card-${index}`;
+
+                let optionsHTML = "";
+                qData.options.forEach((opt, optIndex) => {
+                    optionsHTML += `
+                        <label class="flex items-center p-3.5 border rounded-xl cursor-pointer hover:bg-indigo-50/50 transition border-slate-200 hover:border-indigo-200 group">
+                            <input type="radio" name="question-${index}" value="${optIndex}" 
+                                onchange="selectAnswer(${index}, ${optIndex})" 
+                                ${userAnswers[index] === optIndex ? 'checked' : ''}
+                                class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                            <span class="ms-3 text-slate-700 font-medium group-hover:text-indigo-900">${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="flex items-start space-x-3 mb-4">
+                        <span class="bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-lg text-sm flex-shrink-0 mt-0.5">
+                            ${index + 1}
+                        </span>
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 leading-snug">
+                            ${qData.q}
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                        ${optionsHTML}
+                    </div>
+                `;
+                questionsContainer.appendChild(qCard);
+            });
+        }
+
+        // Handle Radio Selection
+        function selectAnswer(qIndex, optIndex) {
+            userAnswers[qIndex] = optIndex;
+            updateProgress();
+        }
+
+        // Update Progress Bar
+        function updateProgress() {
+            const answeredCount = userAnswers.filter(ans => ans !== null).length;
+            answeredCountSpan.innerText = answeredCount;
+            const percentage = (answeredCount / quizData.length) * 100;
+            progressBar.style.width = `${percentage}%`;
+
+            // Update Current Visible Question Counter approximate
+            const visibleQuestions = Math.min(answeredCount + 1, quizData.length);
+            document.getElementById('current-q-num').innerText = answeredCount > 0 ? answeredCount : 1;
+        }
+
+        // Calculate and Submit Quiz
+        function submitQuiz() {
+            const unanswered = userAnswers.filter(ans => ans === null).length;
+            
+            if(unanswered > 0) {
+                const confirmSubmit = window.confirm(`আপনি এখনো ${unanswered}টি প্রশ্নের উত্তর দেননি। আপনি কি নিশ্চিত যে পরীক্ষা জমা দিতে চান?`);
+                if(!confirmSubmit) return;
+            }
+
+            // Calculate score
+            let score = 0;
+            quizData.forEach((q, idx) => {
+                if(userAnswers[idx] === q.correct) {
+                    score++;
+                }
+            });
+
+            showResults(score);
+        }
+
+        // Display Result View
+        function showResults(score) {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            document.getElementById('result-user-title').innerText = `${userName}, আপনার ফলাফল!`;
+            document.getElementById('score-display').innerText = score;
+            
+            const percentage = ((score / quizData.length) * 100).toFixed(1);
+            document.getElementById('percentage-display').innerText = `পাস নম্বর শতাংশ: ${percentage}%`;
+
+            const iconBg = document.getElementById('result-icon-bg');
+            const icon = document.getElementById('result-icon');
+            const tag = document.getElementById('performance-tag');
+
+            if(score >= 55) {
+                iconBg.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl bg-emerald-100 text-emerald-600";
+                icon.className = "fa-solid fa-trophy";
+                tag.className = "inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mt-2 bg-emerald-100 text-emerald-800";
+                tag.innerText = "অসাধারণ দক্ষতা (Pass with Distinction)";
+            } else if(score >= 35) {
+                iconBg.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl bg-amber-100 text-amber-600";
+                icon.className = "fa-solid fa-medal";
+                tag.className = "inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mt-2 bg-amber-100 text-amber-800";
+                tag.innerText = "ভালো ফলাফল (Good)";
+            } else {
+                iconBg.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl bg-rose-100 text-rose-600";
+                icon.className = "fa-solid fa-book-bookmark";
+                tag.className = "inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mt-2 bg-rose-100 text-rose-800";
+                tag.innerText = "আরো অনুশীলনের প্রয়োজন (Needs Improvement)";
+            }
+
+            // Render Detailed Review
+            renderReview();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Detailed Answers Review
+        function renderReview() {
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = "";
+
+            quizData.forEach((q, idx) => {
+                const isCorrect = userAnswers[idx] === q.correct;
+                const isUnanswered = userAnswers[idx] === null;
+
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/60 border-rose-200'}`;
+
+                let statusBadge = "";
+                if (isCorrect) {
+                    statusBadge = `<span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md"><i class="fa-solid fa-check me-1"></i>সঠিক</span>`;
+                } else if(isUnanswered) {
+                    statusBadge = `<span class="text-xs font-bold text-slate-600 bg-slate-200 px-2.5 py-1 rounded-md"><i class="fa-solid fa-minus me-1"></i>উত্তর দেওয়া হয়নি</span>`;
+                } else {
+                    statusBadge = `<span class="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-md"><i class="fa-solid fa-xmark me-1"></i>ভুল</span>`;
+                }
+
+                const userChoiceText = isUnanswered ? "কোনোটি নয়" : q.options[userAnswers[idx]];
+                const correctChoiceText = q.options[q.correct];
+
+                item.innerHTML = `
+                    <div class="flex justify-between items-start gap-2 mb-2">
+                        <h4 class="font-bold text-slate-800 text-sm md:text-base">${idx + 1}. ${q.q}</h4>
+                        ${statusBadge}
+                    </div>
+                    <div class="text-xs md:text-sm space-y-1">
+                        <p class="${isCorrect ? 'text-emerald-800' : 'text-rose-800'}">
+                            <strong>আপনার উত্তর:</strong> ${userChoiceText}
+                        </p>
+                        ${!isCorrect ? `<p class="text-emerald-800"><strong>সঠিক উত্তর:</strong> ${correctChoiceText}</p>` : ''}
+                    </div>
+                `;
+                reviewContainer.appendChild(item);
+            });
+        }
+
+        // Restart Quiz
+        function restartQuiz() {
+            userAnswers = new Array(quizData.length).fill(null);
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            document.getElementById('username').value = userName; // keep previous name handy
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
